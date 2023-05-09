@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ICourtSearch, ICourtSearches, IRecruiter } from '../utils/types';
+import { ICourtSearch, ICourtSearches } from '../utils/types';
 
 const courtSearchSchema = new Schema<ICourtSearch>({
   status: {

@@ -13,6 +13,7 @@ import { errorResponse } from './utils/error';
 dotenv.config();
 
 const app = express();
+app.disable("x-powered-by");
 
 app.use(bodyParser.json());
 
@@ -21,20 +22,6 @@ app.use(ReportRoute);
 app.use(RecruiterRoute);
 app.use(AdverseRoute);
 app.use(CourtSearchRoute);
-
-app.use((request: Request, response : Response, next : NextFunction) => {
-	response.setHeader('Access-Control-Allow-Origin', '*');
-	response.setHeader(
-		'Access-Control-Allow-Methods',
-		'OPTIONS, GET, POST, PUT, PATCH, DELETE'
-	);
-	response.setHeader(
-		'Access-Control-Allow-Headers',
-		'Content-Type, Authorization'
-	);
-	next();
-});
-
 
 app.use(errorResponse);
 

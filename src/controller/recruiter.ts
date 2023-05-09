@@ -1,5 +1,4 @@
 import { Request , Response, NextFunction } from "express"
-import Report from '../models/report';
 import Recruiter from '../models/recruiter';
 
 
