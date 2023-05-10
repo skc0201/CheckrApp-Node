@@ -4,7 +4,7 @@ import { getAllCourtSearchReport, AddCourtSearchReport, getCourtSearchReportById
 
 const router = express.Router();
 
-router.get('', getAllCourtSearchReport);
+router.get('/', getAllCourtSearchReport);
 router.post('/:candidateId', AddCourtSearchReport);
 router.get('/:candidateId', getCourtSearchReportById);
 router.put('/:candidateId', updateCourtSearchById);
