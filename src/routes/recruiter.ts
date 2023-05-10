@@ -4,8 +4,8 @@ import { getAllRecruiters, addRecruiter, getRecruiterById, deleteRecruiter } fro
 
 const router = express.Router();
 
-router.get('/All', getAllRecruiters);
-router.post('', addRecruiter);
+router.get('/', getAllRecruiters);
+router.post('/', addRecruiter);
 router.get('/:userId', getRecruiterById);
 router.delete('/:userId', deleteRecruiter);
 

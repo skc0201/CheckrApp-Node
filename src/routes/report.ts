@@ -4,7 +4,7 @@ import { addReport, getAllReports, getReportById, updateReport } from '../contro
 
 const router = express.Router();
 
-router.get('/All', getAllReports);
+router.get('/', getAllReports);
 router.post('/:candidateId', addReport);
 router.get('/:candidateId', getReportById);
 router.put('/:candidateId', updateReport);

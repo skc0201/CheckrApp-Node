@@ -4,8 +4,8 @@ import {getAllCandidates , addCandidate, deleteCandidate, updateCandidate, getCa
 
 const router = express.Router();
 
-router.get('/All', getAllCandidates);
-router.post('', addCandidate);
+router.get('/', getAllCandidates);
+router.post('/', addCandidate);
 router.get('/:candidateId', getCandidateById);
 router.put('/:candidateId', updateCandidate);
 router.delete('/:candidateId', deleteCandidate);
