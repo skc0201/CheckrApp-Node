@@ -4,10 +4,10 @@ import { getAllCourtSearchReport, AddCourtSearchReport, getCourtSearchReportById
 
 const router = express.Router();
 
-router.get('/courtsearch', getAllCourtSearchReport);
-router.post('/courtsearch/:candidateId', AddCourtSearchReport);
-router.get('/courtsearch/:candidateId', getCourtSearchReportById);
-router.put('/courtsearch/:candidateId', updateCourtSearchById);
-router.delete('/courtsearch/:candidateId', deleteCourtSearch);
+router.get('', getAllCourtSearchReport);
+router.post('/:candidateId', AddCourtSearchReport);
+router.get('/:candidateId', getCourtSearchReportById);
+router.put('/:candidateId', updateCourtSearchById);
+router.delete('/:candidateId', deleteCourtSearch);
 
 export default router;

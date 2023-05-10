@@ -4,10 +4,10 @@ import {getAllCandidates , addCandidate, deleteCandidate, updateCandidate, getCa
 
 const router = express.Router();
 
-router.get('/candidates', getAllCandidates);
-router.post('/candidate', addCandidate);
-router.get('/candidate/:candidateId', getCandidateById);
-router.put('/candidate/:candidateId', updateCandidate);
-router.delete('/candidate/:candidateId', deleteCandidate);
+router.get('/All', getAllCandidates);
+router.post('', addCandidate);
+router.get('/:candidateId', getCandidateById);
+router.put('/:candidateId', updateCandidate);
+router.delete('/:candidateId', deleteCandidate);
 
 export default router;

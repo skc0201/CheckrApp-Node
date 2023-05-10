@@ -16,11 +16,11 @@ app.disable("x-powered-by");
 
 app.use(bodyParser.json());
 
-app.use(candidateRoute);
-app.use(ReportRoute);
-app.use(RecruiterRoute);
-app.use(AdverseRoute);
-app.use(CourtSearchRoute);
+app.use('/candidate',candidateRoute);
+app.use('/report',ReportRoute);
+app.use('/user',RecruiterRoute);
+app.use('/adverse',AdverseRoute);
+app.use('/courtsearch',CourtSearchRoute);
 
 app.use(errorResponse);
 
