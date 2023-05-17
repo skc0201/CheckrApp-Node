@@ -91,7 +91,7 @@ describe('Auth API', () => {
         .request(app)
         .post('/auth/login')
         .send({
-          email: 'sam@example.com',
+          email: 'test@checkr.com',
           password: 'wrongpassword',
         });
 
