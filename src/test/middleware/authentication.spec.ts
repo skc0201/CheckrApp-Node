@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { NextFunction } from 'express';
 
 import  {authenticate} from '../../middleware/auth';
+import { NOT_AUTHENTICATED } from '../../utils/constant';
 
 describe('Authentication middleware', () => {
 	const sandbox = sinon.createSandbox();
@@ -21,7 +22,7 @@ describe('Authentication middleware', () => {
 		};
 		status.returns(response);
 		const next: NextFunction = sinon.mock();
-		assert.throws(function() { authenticate(request , response , next) }, Error, 'Not authenticated.');
+		assert.throws(function() { authenticate(request , response , next) }, Error,NOT_AUTHENTICATED);
 	});
 
 	it('Check if the middleware throws an error is authorization header is only one string', () => {
@@ -40,7 +41,7 @@ describe('Authentication middleware', () => {
 
 		status.returns(response);
 		const next: NextFunction = sinon.mock();
-		assert.throws(function() { authenticate(request , response , next) }, Error, 'Not authenticated!!');
+		assert.throws(function() { authenticate(request , response , next) }, Error, NOT_AUTHENTICATED);
 
 
 	});
@@ -87,7 +88,7 @@ describe('Authentication middleware', () => {
 		status.returns(response);
 		const next: NextFunction = sinon.mock();
 		sandbox.stub(jwt, 'verify').returns(obj);
-        assert.throws(function() { authenticate(request , response , next) }, Error, 'Not authenticated!!.');
+        assert.throws(function() { authenticate(request , response , next) }, Error, NOT_AUTHENTICATED);
         expect(request).not.have.property('userId');
 	});
 	afterEach(() => {

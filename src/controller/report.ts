@@ -1,6 +1,7 @@
 import { Request , Response, NextFunction } from "express"
 import Report from '../models/report';
 import { validationResult } from "express-validator";
+import { REPORT_ADDED, REPORT_EXIST, REPORT_FOUND, REPORT_LIST, REPORT_NOT_FOUND, REPORT_UPDATE, VALIDATION_FAILED } from "../utils/constant";
 
 
 export const getAllReports = (req: Request, res: Response, next: NextFunction) => {
@@ -9,7 +10,7 @@ export const getAllReports = (req: Request, res: Response, next: NextFunction) =
         .populate('candidate')
         .then(reports => {
             res.status(200).json({
-                message:"Report of all candidates fetched Successfully",
+                message:REPORT_LIST,
                 candidates: reports
             })
         }).catch(error => {
@@ -19,14 +20,11 @@ export const getAllReports = (req: Request, res: Response, next: NextFunction) =
 
 export const addReport = (req: Request, res: Response, next: NextFunction) => {
     const candidateId = req.params.candidateId;
-    const status = req.body.status;
-    const adjudication = req.body.adjudication;
-    const completedAt = req.body.completedAt;
-    const tat = req.body.tat;
+    const data = req.body ;
 
     const valError = validationResult(req);
     if(!valError.isEmpty()){
-        const error = new Error('Validation failed.');
+        const error = new Error(VALIDATION_FAILED);
         error.statusCode = 422;
         error.data = valError.array();
         throw error;  
@@ -36,20 +34,17 @@ export const addReport = (req: Request, res: Response, next: NextFunction) => {
     .find({candidate: candidateId})
     .then(result => {
         if(result[0]){
-            const error = new Error('Report already exists for candidate id ' + candidateId);
+            const error = new Error(REPORT_EXIST + candidateId);
             throw error;
         }
         const report = new Report({
-            status:status,
-            adjudication:adjudication,
-            completedAt:completedAt,
-            tat:tat,
+            ...data,
             candidate:candidateId
         });
         return report.save()
         .then(result => {
             res.status(201).json({
-                message:"Candidate Report added successfully" , Report: result
+                message: REPORT_ADDED , Report: result
             })
         })
     })
@@ -64,11 +59,11 @@ export const getReportById = (req: Request, res: Response, next: NextFunction) =
         .populate('candidate')
         .then(report => {
             if(!report[0]){
-                const error = new Error('Could not find candidate report with id: ' + id);
+                const error = new Error(REPORT_NOT_FOUND + id);
                 throw error;
             }
             res.status(200).json({
-                message:"Candidate report fetched Successfully",
+                message:REPORT_FOUND,
                 candidates: report
             })
         }).catch(error => {
@@ -78,14 +73,12 @@ export const getReportById = (req: Request, res: Response, next: NextFunction) =
 
 export const updateReport = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.candidateId;
-    const status = req.body.status;
-    const adjudication = req.body.adjudication;
-    const completedAt = req.body.completedAt;
-    const tat = req.body.tat;
+
+    const {status , adjudication , completedAt , tat} =req.body;
     
     const valError = validationResult(req);
     if(!valError.isEmpty()){
-        const error = new Error('Validation failed.');
+        const error = new Error(VALIDATION_FAILED);
         error.statusCode = 422;
         error.data = valError.array();
         throw error;  
@@ -93,21 +86,16 @@ export const updateReport = (req: Request, res: Response, next: NextFunction) =>
 
 
     Report
-        .find({candidate: id})
+        .findOneAndUpdate({candidate: id} , {
+            status , adjudication , completedAt , tat
+        } )
         .then(report => {
-            if(!report[0]){
-                const error = new Error('Could not find candidate report with id: ' + id);
+            if(!report){
+                const error = new Error(REPORT_NOT_FOUND + id);
                 throw error;
             }
-            report[0].status = status;
-            report[0].adjudication = adjudication;
-            report[0].completedAt = completedAt;
-            report[0].tat = tat;
-            return report[0].save()
-        })
-        .then(result => {
             res.status(200).json({
-                message:"Candidate report updated Successfully",
+                message:REPORT_UPDATE,
             })
         })
         .catch(error => {

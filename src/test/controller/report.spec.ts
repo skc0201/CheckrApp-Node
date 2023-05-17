@@ -8,6 +8,7 @@ import Recruiter from '../../models/recruiter';
 import Report from '../../models/report';
 import Adverse from '../../models/adverse-action';
 import mongoose, { Types } from 'mongoose';
+import { CANDIDATE_ADDRESS, CANDIDATE_DATA, CANDIDATE_REPORT, LOGIN_CRED, NOT_AUTHENTICATED, RECRUITER_DATA, REPORT_ADDED, REPORT_EXIST, REPORT_FOUND, REPORT_LIST, REPORT_NOT_FOUND, REPORT_UPDATE, VALIDATION_FAILED } from '../../utils/constant';
 
 chai.use(chaiHttp);
 
@@ -24,19 +25,12 @@ before(async () => {
         // Create a recruiter for testing purposes
         const hashedPassword = await bcrypt.hash('password', 12);
         const recruiter = await new Recruiter({
-            email: 'test@checkr.com',
-            password: hashedPassword,
-            name: 'Test Recruiter',
-            phone: 9675648978,
-            company:"Test company"
+                ...RECRUITER_DATA, password:hashedPassword
         });
         await recruiter.save();
         const loginResponse = await chai.request(app)
             .post('/auth/login')
-            .send({
-                email: 'test@checkr.com',
-                password: 'password'
-            })
+            .send(LOGIN_CRED)
         token = loginResponse.body.token;
         id=loginResponse.body.recruiterId;
     });
@@ -64,7 +58,7 @@ before(async () => {
           const res = await chai
             .request(app)
             .get('/report/');
-            expect(res.body).to.have.property('message', 'Not authenticated.')
+            expect(res.body).to.have.property('message', NOT_AUTHENTICATED)
         });
         it('should get all report', async () => {
           const res = await chai
@@ -72,40 +66,26 @@ before(async () => {
             .get('/report/')
             .set('Authorization', `Bearer ${token}`);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.property('message', 'Report of all candidates fetched Successfully');
+          expect(res.body).to.have.property('message', REPORT_LIST);
           expect(res.body).to.have.property('candidates').to.be.an('array');
         });
       });
 
 describe("Get report by id", () => {
 it("should get a candidate report by ID", async () => {
-      const address = new Address({
-        houseNo: "1",
-        streetNo: "456",
-        city: "City",
-        state: "State",
-        pincode: "123456",
-      });
+      const address = new Address(CANDIDATE_ADDRESS);
       await address.save();
 
       addressId = address._id;
       const candidate = new Candidate({
-        firstName: "sam",
-        lastName: "last",
-        email: "sam@example.com",
-        contact: "9867546324",
-        license: "ABC123",
-        DOB: "1990-01-01",
+...CANDIDATE_DATA,
         address: address._id,
         recruiter: id,
       });
       await candidate.save();
       candidateId = candidate?._id as Types.ObjectId
       const report = new Report({
-        status:'status',
-        adjudication:'adjudication',
-        completedAt:'1990.01.01',
-        tat:'2h',
+        ...CANDIDATE_REPORT,
         candidate:candidateId
     });
     await report.save()
@@ -116,7 +96,7 @@ it("should get a candidate report by ID", async () => {
                 .set('Authorization', `Bearer ${token}`);
               expect(res).to.have.status(200);
               expect(res.body).to.be.an("object");
-              expect(res.body.message).to.equal("Candidate report fetched Successfully");
+              expect(res.body.message).to.equal(REPORT_FOUND);
               expect(res.body.candidates).to.be.an("array");
             });
         
@@ -129,7 +109,7 @@ it("should get a candidate report by ID", async () => {
               expect(res).to.have.status(500);
               expect(res.body).to.be.an("object");
               expect(res.body.message).to.equal(
-                'Could not find candidate report with id: ' + invalidId
+                REPORT_NOT_FOUND + invalidId
               );
         });
 });
@@ -137,23 +117,12 @@ it("should get a candidate report by ID", async () => {
 
 describe("Add report API", () => {
     it("should create a new report", async () => {
-          const address = new Address({
-            houseNo: "1",
-            streetNo: "456",
-            city: "City",
-            state: "State",
-            pincode: "123456",
-          });
+          const address = new Address(CANDIDATE_ADDRESS);
           await address.save();
     
           addressId = address._id;
           const candidate = new Candidate({
-            firstName: "sam",
-            lastName: "last",
-            email: "sam@example.com",
-            contact: "9867546324",
-            license: "ABC123",
-            DOB: "1990-01-01",
+...CANDIDATE_DATA,
             address: address._id,
             recruiter: id,
           });
@@ -163,82 +132,45 @@ describe("Add report API", () => {
                     .request(app)
                     .post(`/report/${candidateId}`)
                     .set('Authorization', `Bearer ${token}`)
-                    .send({
-                        status:"clear",
-                        adjudication:"Engage",
-                        completedAt:'1990-01-01',
-                        tat:'2h',
-                        candidate:candidateId
-                    });
+                    .send(CANDIDATE_REPORT);
                     reportId = res.body.Report._id;
                   expect(res).to.have.status(201);
                   expect(res.body).to.be.an("object");
-                  expect(res.body.message).to.equal("Candidate Report added successfully");
+                  expect(res.body.message).to.equal(REPORT_ADDED);
                   expect(res.body.Report).to.be.an("object");
 });
 
 it("should throw error if report already found", async () => {
-    const address = new Address({
-      houseNo: "1",
-      streetNo: "456",
-      city: "City",
-      state: "State",
-      pincode: "123456",
-    });
+    const address = new Address(CANDIDATE_ADDRESS);
     await address.save();
 
     addressId = address._id;
     const candidate = new Candidate({
-      firstName: "sam",
-      lastName: "last",
-      email: "sam@example.com",
-      contact: "9867546324",
-      license: "ABC123",
-      DOB: "1990-01-01",
+...CANDIDATE_DATA,
       address: address._id,
       recruiter: id,
     });
     await candidate.save();
     candidateId = candidate?._id as Types.ObjectId
     const report = new Report({
-      status:'status',
-      adjudication:'adjudication',
-      completedAt:'1990.01.01',
-      tat:'2h',
+...CANDIDATE_REPORT,
       candidate:candidateId
   });
   await report.save()
    reportId = report._id;
    const res = await chai.request(app).post(`/report/${candidateId}`)
    .set('Authorization', `Bearer ${token}`)
-   .send({
-    status:"clear",
-    adjudication:"Engage",
-    completedAt:'1990-01-01',
-    tat:'2h',
-    candidate:candidateId
-   });
+   .send(CANDIDATE_REPORT);
    expect(res.body).to.be.an("object");
-   expect(res.body.message).to.equal('Report already exists for candidate id ' + candidateId);
+   expect(res.body.message).to.equal(REPORT_EXIST + candidateId);
 });
             
 it("should return an error if validation fails", async () => {
-        const address = new Address({
-            houseNo: "1",
-            streetNo: "456",
-            city: "City",
-            state: "State",
-            pincode: "123456",
-          });
+        const address = new Address(CANDIDATE_ADDRESS);
           await address.save();
           addressId = address._id;
           const candidate = new Candidate({
-            firstName: "sam",
-            lastName: "last",
-            email: "sam@example.com",
-            contact: "9867546324",
-            license: "ABC123",
-            DOB: "1990-01-01",
+            ...CANDIDATE_DATA,
             address: address._id,
             recruiter: id,
           });
@@ -249,39 +181,25 @@ it("should return an error if validation fails", async () => {
       .set('Authorization', `Bearer ${token}`)
       .send({});
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("Validation failed.");
+      expect(res.body.message).to.equal(VALIDATION_FAILED);
 });
 });
 
 
 describe("Update report API", () => {
     it("should update a  report", async () => {
-          const address = new Address({
-            houseNo: "1",
-            streetNo: "456",
-            city: "City",
-            state: "State",
-            pincode: "123456",
-          });
+          const address = new Address(CANDIDATE_ADDRESS);
           await address.save();
           addressId = address._id;
           const candidate = new Candidate({
-            firstName: "sam",
-            lastName: "last",
-            email: "sam@example.com",
-            contact: "9867546324",
-            license: "ABC123",
-            DOB: "1990-01-01",
+...CANDIDATE_DATA,
             address: address._id,
             recruiter: id,
           });
           await candidate.save();
           candidateId = candidate?._id as Types.ObjectId;
           const report = new Report({
-            status:'status',
-            adjudication:'adjudication',
-            completedAt:'1990.01.01',
-            tat:'2h',
+...CANDIDATE_REPORT,
             candidate:candidateId
         });
         await report.save()
@@ -290,59 +208,37 @@ describe("Update report API", () => {
                     .request(app)
                     .put(`/report/${candidateId}`)
                     .set('Authorization', `Bearer ${token}`)
-                    .send({
-                        status:"clear",
-                        adjudication:"pre-adverse",
-                        completedAt:'1990-01-01',
-                        tat:'3h',
-                    });
+                    .send(
+                        CANDIDATE_REPORT
+                    );
                   expect(res).to.have.status(200);
                   expect(res.body).to.be.an("object");
-                  expect(res.body.message).to.equal("Candidate report updated Successfully");
+                  expect(res.body.message).to.equal(REPORT_UPDATE);
 });
 
 it("should throw error if candidate not found", async () => {
     const invalidCanId: Types.ObjectId = new mongoose.Types.ObjectId('4edd40c86762e0fb12000003');
    const res = await chai.request(app).put(`/report/${invalidCanId}`)
    .set('Authorization', `Bearer ${token}`)
-   .send({
-    status:"clear",
-    adjudication:"Engage",
-    completedAt:'1990-01-01',
-    tat:'2h',
-   });
+   .send(CANDIDATE_REPORT);
    expect(res.body).to.be.an("object");
-   expect(res.body.message).to.equal('Could not find candidate report with id: ' + invalidCanId);
+   expect(res.body.message).to.equal(REPORT_NOT_FOUND + invalidCanId);
 });
             
 it("should return an error if validation fails", async () => {
-    const address = new Address({
-        houseNo: "1",
-        streetNo: "456",
-        city: "City",
-        state: "State",
-        pincode: "123456",
-      });
+    const address = new Address(CANDIDATE_ADDRESS);
       await address.save();
   
       addressId = address._id;
       const candidate = new Candidate({
-        firstName: "sam",
-        lastName: "last",
-        email: "sam@example.com",
-        contact: "9867546324",
-        license: "ABC123",
-        DOB: "1990-01-01",
+...CANDIDATE_DATA,
         address: address._id,
         recruiter: id,
       });
       await candidate.save();
       candidateId = candidate?._id as Types.ObjectId
       const report = new Report({
-        status:'status',
-        adjudication:'adjudication',
-        completedAt:'1990.01.01',
-        tat:'2h',
+...CANDIDATE_REPORT,
         candidate:candidateId
     });
     await report.save()
@@ -351,7 +247,7 @@ it("should return an error if validation fails", async () => {
      .set('Authorization', `Bearer ${token}`)
      .send({});
      expect(res.body).to.be.an("object");
-     expect(res.body.message).to.equal('Validation failed.');
+     expect(res.body.message).to.equal(VALIDATION_FAILED);
 });
 });
 

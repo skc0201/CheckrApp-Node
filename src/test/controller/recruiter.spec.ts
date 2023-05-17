@@ -7,6 +7,7 @@ import Candidate from '../../models/candidate';
 import Recruiter from '../../models/recruiter';
 import Adverse from '../../models/adverse-action';
 import mongoose, { Types } from 'mongoose';
+import { LOGIN_CRED, NOT_AUTHENTICATED, RECRUITER_DATA, RECRUITER_DELETED, RECRUITER_FOUND, RECRUITER_LIST, RECRUITER_NOT_FOUND_MSSG } from '../../utils/constant';
 
 chai.use(chaiHttp);
 
@@ -21,19 +22,12 @@ before(async () => {
         // Create a recruiter for testing purposes
         const hashedPassword = await bcrypt.hash('password', 12);
         const recruiter = await new Recruiter({
-            email: 'test@checkr.com',
-            password: hashedPassword,
-            name: 'Test Recruiter',
-            phone: 9675648978,
-            company:"Test company"
+            ...RECRUITER_DATA , password: hashedPassword
         });
         await recruiter.save();
         const loginResponse = await chai.request(app)
             .post('/auth/login')
-            .send({
-                email: 'test@checkr.com',
-                password: 'password'
-            })
+            .send(LOGIN_CRED)
         token = loginResponse.body.token;
         id=loginResponse.body.recruiterId;
     });
@@ -59,7 +53,7 @@ before(async () => {
           const res = await chai
             .request(app)
             .get('/user/');
-            expect(res.body).to.have.property('message', 'Not authenticated.')
+            expect(res.body).to.have.property('message', NOT_AUTHENTICATED)
         });
         it('should get all recruiters', async () => {
           const res = await chai
@@ -67,7 +61,7 @@ before(async () => {
             .get('/user/')
             .set('Authorization', `Bearer ${token}`);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.property('message', 'All recruiters fetched Successfully');
+          expect(res.body).to.have.property('message', RECRUITER_LIST);
           expect(res.body).to.have.property('recruiters').to.be.an('array');
         });
       });
@@ -80,7 +74,7 @@ before(async () => {
                 .set('Authorization', `Bearer ${token}`);
               expect(res).to.have.status(200);
               expect(res.body).to.be.an("object");
-              expect(res.body.message).to.equal("Recruiter fetched Successfully");
+              expect(res.body.message).to.equal(RECRUITER_FOUND);
               expect(res.body.candidates).to.be.an("object");
             
             });
@@ -96,7 +90,7 @@ before(async () => {
               expect(res).to.have.status(500);
               expect(res.body).to.be.an("object");
               expect(res.body.message).to.equal(
-                'Could not find recruiter  with id: ' + invalidRecId
+                RECRUITER_NOT_FOUND_MSSG + invalidRecId
               );
             });
 });
@@ -110,7 +104,7 @@ it('should delete recruiter', async () => {
          .delete(`/user/${id}`)
          .set('Authorization', `Bearer ${token}`);
            expect(res).to.have.status(200);
-           expect(res.body).to.have.property('message').equal('Recruiter deleted Successfully');
+           expect(res.body).to.have.property('message').equal(RECRUITER_DELETED);
      });
 it('should return 404 if recruiter not found', (done) => {
         const invalidRecId: Types.ObjectId = new mongoose.Types.ObjectId('4edd40c86762e0fb12000003');
@@ -121,7 +115,7 @@ it('should return 404 if recruiter not found', (done) => {
          .end((err, res) => {
            expect(res).to.have.status(500);
            expect(res.body.message).to.equal(
-            'Could not find recruiter with id: ' + invalidRecId
+            RECRUITER_NOT_FOUND_MSSG + invalidRecId
           );
            done();
          });

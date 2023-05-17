@@ -2,6 +2,7 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import { app } from '../../app';
 import Recruiter from '../../models/recruiter';
+import { LOGIN_CRED, RECRUITER_ADDED, RECRUITER_DATA, RECRUITER_NOT_FOUND, VALIDATION_FAILED, WRONG_PASSWORD } from '../../utils/constant';
 
 chai.use(chaiHttp);
 
@@ -16,14 +17,10 @@ describe('Auth API', () => {
         .request(app)
         .post('/auth/signup')
         .send({
-          name: 'Sam',
-          email: 'sam@example.com',
-          password: 'password',
-          company: 'Acme Inc',
-          phone: '9876453623',
+            ...RECRUITER_DATA , password:'password'
         });
       expect(res).to.have.status(201);
-      expect(res.body).to.have.property('message', 'Recruiter added successfully');
+      expect(res.body).to.have.property('message', RECRUITER_ADDED);
       expect(res.body).to.have.property('recruiterId');
     });
 
@@ -32,13 +29,10 @@ describe('Auth API', () => {
         .request(app)
         .post('/auth/signup')
         .send({
-          name: 'Sam',
-          email: 'sam@example.com',
-          password: '',
-          company: 'Acme Inc',
-          phone: '9876453623',
+            ...RECRUITER_DATA , password:''
+
         });
-      expect(res.body).to.have.property('message', 'Validation failed.');
+      expect(res.body).to.have.property('message', VALIDATION_FAILED);
       expect(res.body).to.have.property('data').to.be.an('array');
     });
 
@@ -48,13 +42,10 @@ describe('Auth API', () => {
         .request(app)
         .post('/auth/signup')
         .send({
-          name: 'Sam Doe',
-          email: 'sam@example.com', // Use the existing email here
-          password: 'password123',
-          company: 'Acme Inc',
-          phone: '9876543210',
+            ...RECRUITER_DATA , password:'password123'
+
         });
-        expect(res.body).to.have.property('message', 'Validation failed.');
+        expect(res.body).to.have.property('message', VALIDATION_FAILED);
         expect(res.body).to.have.property('data').to.be.an('array');
       });
   });
@@ -63,10 +54,7 @@ describe('Auth API', () => {
       const res = await chai
         .request(app)
         .post('/auth/login')
-        .send({
-          email: 'sam@example.com',
-          password: 'password',
-        });
+        .send(LOGIN_CRED);
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property('token');
@@ -82,7 +70,7 @@ describe('Auth API', () => {
           password: '',
         });
       expect(res).to.have.status(500);
-      expect(res.body).to.have.property('message', 'Validation failed.');
+      expect(res.body).to.have.property('message', VALIDATION_FAILED);
       expect(res.body).to.have.property('data').to.be.an('array');
     });
 
@@ -95,7 +83,7 @@ describe('Auth API', () => {
           password: 'password',
         });
       expect(res).to.have.status(500); // Assuming the error handler returns 500 for this error
-      expect(res.body).to.have.property('message', 'A recruiter with this nonexistent@example.com could not be found.');
+      expect(res.body).to.have.property('message', RECRUITER_NOT_FOUND+'nonexistent@example.com');
     });
 
     it('should return error for wrong password', async () => {
@@ -108,7 +96,7 @@ describe('Auth API', () => {
         });
 
       expect(res).to.have.status(500); // Assuming the error handler returns 500 for this error
-      expect(res.body).to.have.property('message', 'Wrong password!! Please try again.');
+      expect(res.body).to.have.property('message', WRONG_PASSWORD);
     });
   });
 

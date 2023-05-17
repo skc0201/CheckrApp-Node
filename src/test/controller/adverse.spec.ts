@@ -6,8 +6,8 @@ import Address from '../../models/address';
 import Candidate from '../../models/candidate';
 import Recruiter from '../../models/recruiter';
 import Adverse from '../../models/adverse-action';
-
 import  { Types } from 'mongoose';
+import { ADVERSE_ADD, ADVERSE_LIST_SUCCESS, CANDIDATE_ADDRESS, CANDIDATE_ADVERSE, CANDIDATE_DATA, LOGIN_CRED, NOT_AUTHENTICATED, RECRUITER_DATA, VALIDATION_FAILED } from '../../utils/constant';
 
 chai.use(chaiHttp);
 
@@ -22,19 +22,12 @@ before(async () => {
         // Create a recruiter for testing purposes
         const hashedPassword = await bcrypt.hash('password', 12);
         const recruiter = await new Recruiter({
-            email: 'test@checkr.com',
-            password: hashedPassword,
-            name: 'Test Recruiter',
-            phone: 9675648978,
-            company:"Test company"
+            ...RECRUITER_DATA , password: hashedPassword
         });
         await recruiter.save();
         const loginResponse = await chai.request(app)
             .post('/auth/login')
-            .send({
-                email: 'test@checkr.com',
-                password: 'password'
-            })
+            .send(LOGIN_CRED)
         token = loginResponse.body.token;
         id=loginResponse.body.recruiterId;
 
@@ -58,7 +51,7 @@ before(async () => {
           const res = await chai
             .request(app)
             .get('/adverse/');
-            expect(res.body).to.have.property('message', 'Not authenticated.')
+            expect(res.body).to.have.property('message', NOT_AUTHENTICATED)
         });
         it('should get all adverse', async () => {
           const res = await chai
@@ -66,7 +59,7 @@ before(async () => {
             .get('/adverse/')
             .set('Authorization', `Bearer ${token}`);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.property('message', 'Adverse action list fetched Successfully');
+          expect(res.body).to.have.property('message', ADVERSE_LIST_SUCCESS);
           expect(res.body).to.have.property('data').to.be.an('array');
         });
       });
@@ -74,74 +67,41 @@ before(async () => {
 
   describe(" Add Adverse list", () => {
     it("should create a new candidate", async () => {
-    const address = new Address({
-        houseNo: "1",
-        streetNo: "456",
-        city: "City",
-        state: "State",
-        pincode: "123456",
-      });
+    const address = new Address(CANDIDATE_ADDRESS);
       await address.save();      
       addressId = address._id;
       const candidate = new Candidate({
-        firstName: "sam",
-        lastName: "last",
-        email: "sam@example.com",
-        contact: "9867546324",
-        license: "ABC123",
-        DOB: "1990-01-01",
+         ...CANDIDATE_DATA,
         address: address._id,
         recruiter: id,
       });
       await candidate.save();
       candidateId = candidate?._id as Types.ObjectId
-      const candidateDetails = await Candidate.find({candidate: candidateId});
-
       const res = await chai
         .request(app)
         .post(`/adverse/${candidateId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({
-            name:'sam',
-            status:'clear',
-            pre_notice_date:'1990-01-01',
-            post_notice_date:'1990-02-02',
-            candidate:candidateId
-        });
+        .send(CANDIDATE_ADVERSE);
         adverseId = res.body.Report._id;
       expect(res).to.have.status(201);
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("Candidate adverse Report added successfully");
+      expect(res.body.message).to.equal(ADVERSE_ADD);
 
     });
     it("should throw error if adverse found", async () => {
-        const address = new Address({
-            houseNo: "1",
-            streetNo: "456",
-            city: "City",
-            state: "State",
-            pincode: "123456",
-          });
+        const address = new Address(CANDIDATE_ADDRESS);
           await address.save();      
           addressId = address._id;
           const candidate = new Candidate({
-            firstName: "sam",
-            lastName: "last",
-            email: "sam@example.com",
-            contact: "9867546324",
-            license: "ABC123",
-            DOB: "1990-01-01",
-            address: address._id,
-            recruiter: id,
-          });
+            ...CANDIDATE_DATA,
+           address: address._id,
+           recruiter: id,
+         });
           await candidate.save();
           candidateId = candidate?._id as Types.ObjectId
 
           const adverse = new Adverse({
-            name:'sam',
-            status:'clear',
-            pre_notice_date:'1990-01-01',
-            post_notice_date:'1990-02-02',
+            ...CANDIDATE_ADVERSE,
             candidate:candidateId
         });
        await adverse.save()
@@ -151,13 +111,7 @@ before(async () => {
             .request(app)
             .post(`/adverse/${candidateId}`)
             .set('Authorization', `Bearer ${token}`)
-            .send({
-                name:'sam',
-                status:'clear',
-                pre_notice_date:'1990-01-01',
-                post_notice_date:'1990-02-02',
-                candidate:candidateId
-            });
+            .send(CANDIDATE_ADVERSE);
       expect(res.body.message).to.equal(
         'Adverse action already exists for candidate id ' + candidateId
       ); 
@@ -167,7 +121,7 @@ before(async () => {
       .set('Authorization', `Bearer ${token}`)
       .send({});
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("Validation failed.");
+      expect(res.body.message).to.equal(VALIDATION_FAILED);
     });
   });
 

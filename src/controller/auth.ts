@@ -4,19 +4,17 @@ import jwt from 'jsonwebtoken'
 import Recruiter from '../models/recruiter';
 import { validationResult } from 'express-validator';
 import dotenv from 'dotenv';
+import { VALIDATION_FAILED, RECRUITER_ADDED, WRONG_PASSWORD, RECRUITER_NOT_FOUND } from "../utils/constant";
 
 dotenv.config();
 
 export const addRecruiter = (req: Request, res: Response, next: NextFunction) => {
-    const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
-    const company = req.body.company;
-    const phone = req.body.phone;
+
+    const {name , email , password , company , phone} = req.body;
 
     const valError = validationResult(req);
     if(!valError.isEmpty()){
-        const error = new Error('Validation failed.');
+        const error = new Error(VALIDATION_FAILED);
         error.statusCode = 422;
         error.data = valError.array();
         throw error;  
@@ -34,7 +32,7 @@ export const addRecruiter = (req: Request, res: Response, next: NextFunction) =>
         return recruiter.save()
         .then(result => {
             res.status(201).json({
-                message:"Recruiter added successfully" , recruiterId: result._id
+                message:RECRUITER_ADDED , recruiterId: result._id
             })
         })
     })
@@ -43,12 +41,12 @@ export const addRecruiter = (req: Request, res: Response, next: NextFunction) =>
     });
 }
 export const loginRecruiter = (req: Request, res: Response, next: NextFunction) => {
-    const email = req.body.email;
-    const password = req.body.password;
+
+    const {email , password} = req.body;
 
     const valError = validationResult(req);
     if(!valError.isEmpty()){
-        const error = new Error('Validation failed.');
+        const error = new Error(VALIDATION_FAILED);
         error.statusCode = 422;
         error.data = valError.array();
         throw error;  
@@ -59,7 +57,7 @@ export const loginRecruiter = (req: Request, res: Response, next: NextFunction) 
     .findOne({email: email})
     .then(recruiter => {
         if(!recruiter){
-            const error = new Error(`A recruiter with this ${email} could not be found.`);
+            const error = new Error(RECRUITER_NOT_FOUND +email);
             throw error;
         }
         currentUser = recruiter;
@@ -67,7 +65,7 @@ export const loginRecruiter = (req: Request, res: Response, next: NextFunction) 
     })
     .then(isEqual => {
         if (!isEqual) {
-            const error = new Error('Wrong password!! Please try again.');
+            const error = new Error(WRONG_PASSWORD);
             throw error;
           }
           const token = jwt.sign(

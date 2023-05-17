@@ -1,5 +1,6 @@
 import { Request , Response, NextFunction } from "express";
 import Recruiter from '../models/recruiter';
+import { RECRUITER_DELETED, RECRUITER_FOUND, RECRUITER_LIST, RECRUITER_NOT_FOUND_MSSG } from "../utils/constant";
 
 
 export const getAllRecruiters = (req: Request, res: Response, next: NextFunction) => {
@@ -7,7 +8,7 @@ export const getAllRecruiters = (req: Request, res: Response, next: NextFunction
         .find()
         .then(recruiters => {
             res.status(200).json({
-                message:"All recruiters fetched Successfully",
+                message:RECRUITER_LIST,
                 recruiters: recruiters
             })
         }).catch(error => {
@@ -21,11 +22,11 @@ export const getRecruiterById = (req: Request, res: Response, next: NextFunction
         .findById(id)
         .then(recruiter => {
             if(!recruiter){
-                const error = new Error('Could not find recruiter  with id: ' + id);
+                const error = new Error(RECRUITER_NOT_FOUND_MSSG + id);
                 throw error;
             }
             res.status(200).json({
-                message:"Recruiter fetched Successfully",
+                message:RECRUITER_FOUND,
                 candidates: recruiter
             })
         }).catch(error => {
@@ -38,14 +39,14 @@ export const  deleteRecruiter = (req: Request, res: Response, next: NextFunction
     Recruiter.findById(id)
     .then(recruiter => {
         if (!recruiter) {
-            const error = new Error('Could not find recruiter with id: ' + id);
+            const error = new Error(RECRUITER_NOT_FOUND_MSSG + id);
             throw error;
           }
           return Recruiter.findByIdAndRemove(id);
     })
     .then(result =>{
         res.status(200).json({
-            message:"Recruiter deleted Successfully",
+            message:RECRUITER_DELETED,
         })
     })
     .catch(error => {
