@@ -1,5 +1,6 @@
 import { Request , Response, NextFunction } from "express"
 import Adverse from '../models/adverse-action';
+import { validationResult } from "express-validator";
 
 
 export const getAllAdverseReport = (req: Request, res: Response, next: NextFunction) => {
@@ -22,7 +23,13 @@ export const AddAdverse = (req: Request, res: Response, next: NextFunction) => {
     const name = req.body.name;
     const pre_notice_date = req.body.pre_notice_date;
     const post_notice_date = req.body.post_notice_date;
-
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     Adverse
     .find({candidate: candidateId})
     .then(result => {

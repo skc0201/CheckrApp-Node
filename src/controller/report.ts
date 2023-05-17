@@ -1,5 +1,6 @@
 import { Request , Response, NextFunction } from "express"
 import Report from '../models/report';
+import { validationResult } from "express-validator";
 
 
 export const getAllReports = (req: Request, res: Response, next: NextFunction) => {
@@ -22,6 +23,14 @@ export const addReport = (req: Request, res: Response, next: NextFunction) => {
     const adjudication = req.body.adjudication;
     const completedAt = req.body.completedAt;
     const tat = req.body.tat;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
 
     Report
     .find({candidate: candidateId})
@@ -54,7 +63,7 @@ export const getReportById = (req: Request, res: Response, next: NextFunction) =
         .find({candidate: id})
         .populate('candidate')
         .then(report => {
-            if(!report){
+            if(!report[0]){
                 const error = new Error('Could not find candidate report with id: ' + id);
                 throw error;
             }
@@ -73,6 +82,15 @@ export const updateReport = (req: Request, res: Response, next: NextFunction) =>
     const adjudication = req.body.adjudication;
     const completedAt = req.body.completedAt;
     const tat = req.body.tat;
+    
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
+
 
     Report
         .find({candidate: id})

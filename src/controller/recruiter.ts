@@ -1,4 +1,4 @@
-import { Request , Response, NextFunction } from "express"
+import { Request , Response, NextFunction } from "express";
 import Recruiter from '../models/recruiter';
 
 
@@ -15,38 +15,6 @@ export const getAllRecruiters = (req: Request, res: Response, next: NextFunction
         })
 }
 
-export const addRecruiter = (req: Request, res: Response, next: NextFunction) => {
-    const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
-    const company = req.body.company;
-    const phone = req.body.phone;
-
-    Recruiter
-    .find({email: email})
-    .then(result => {
-        if(result[0]){
-            const error = new Error('Email already exist!!!');
-            throw error;
-        }
-        const recruiter = new Recruiter({
-            name: name,
-            email: email,
-            password: password,
-            company:company,
-            phone: phone
-        });
-        recruiter.save()
-        .then(result => {
-            res.status(201).json({
-                message:"Recruiter added successfully" , Report: result
-            })
-        })
-    })
-    .catch(error => {
-        next(error);
-    });
-}
 export const getRecruiterById = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.userId;
     Recruiter

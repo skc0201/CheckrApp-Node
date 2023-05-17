@@ -2,6 +2,7 @@ import { Request , Response, NextFunction } from "express"
 import Adddress from '../models/address';
 import Candidate from '../models/candidate';
 import  { Types } from "mongoose";
+import { validationResult } from "express-validator";
 
 
 export const getAllCandidates = (req: Request, res: Response, next: NextFunction) => {
@@ -30,6 +31,14 @@ export const addCandidate = (req: Request, res: Response, next: NextFunction) =>
     const city = req.body.city;
     const state = req.body.state;
     const pincode = req.body.pincode;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     const address = new Adddress({
         houseNo:houseNo,
         streetNo:streetNo,
@@ -47,7 +56,8 @@ export const addCandidate = (req: Request, res: Response, next: NextFunction) =>
             contact:contact,
             license:license,
             DOB:DOB,
-            address:addId
+            address:addId,
+            recruiter:req.userId
         });
         return candidate.save()
     })
@@ -93,6 +103,15 @@ export const updateCandidate = (req: Request, res: Response, next: NextFunction)
     const state = req.body.state;
     const pincode = req.body.pincode;
     let addId: Types.ObjectId;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
+      
     Candidate
         .findById(id)
         .then(candidate => {
@@ -114,7 +133,7 @@ export const updateCandidate = (req: Request, res: Response, next: NextFunction)
         })
         .then(address => {
             if(!address){
-                const error = new Error('Could not find address of candidate with id: ' + id);
+                const error = new Error('Could not find address of candidate with id: ' + addId);
                 throw error;
             }          
              address.houseNo = houseNo;

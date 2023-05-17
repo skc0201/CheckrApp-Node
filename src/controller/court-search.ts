@@ -1,5 +1,6 @@
 import { Request , Response, NextFunction } from "express"
 import CourtSearch from '../models/court-searches';
+import { validationResult } from "express-validator";
 
 
 export const getAllCourtSearchReport = (req: Request, res: Response, next: NextFunction) => {
@@ -23,6 +24,14 @@ export const AddCourtSearchReport = (req: Request, res: Response, next: NextFunc
     const global_watchlist = req.body.global_watchlist;
     const federal_criminal = req.body.federal_criminal;
     const country_criminal = req.body.country_criminal;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     CourtSearch
     .find({candidate: candidateId})
     .then(result => {
@@ -96,6 +105,13 @@ export const updateCourtSearchById = (req: Request, res: Response, next: NextFun
     const federal_criminal = req.body.federal_criminal;
     const country_criminal = req.body.country_criminal;
 
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     CourtSearch
         .find({candidate: id})
         .then(report => {
