@@ -40,7 +40,7 @@ describe('Authentication middleware', () => {
 
 		status.returns(response);
 		const next: NextFunction = sinon.mock();
-		assert.throws(function() { authenticate(request , response , next) }, Error, 'jwt must be provided');
+		assert.throws(function() { authenticate(request , response , next) }, Error, 'Not authenticated!!');
 
 
 	});
