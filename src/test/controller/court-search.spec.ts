@@ -9,7 +9,10 @@ import Report from '../../models/report';
 import CourtSearch from '../../models/court-searches';
 import Adverse from '../../models/adverse-action';
 import mongoose, { Types } from 'mongoose';
-import { CANDIDATE_ADDRESS, CANDIDATE_DATA, COURT_SEARCH_ADDED, COURT_SEARCH_DATA, COURT_SEARCH_DELETED, COURT_SEARCH_EXIST, COURT_SEARCH_FOUND, COURT_SEARCH_LIST, COURT_SEARCH_NOT_FOUND, COURT_SEARCH_UPDATED, LOGIN_CRED, NOT_AUTHENTICATED, RECRUITER_DATA, VALIDATION_FAILED } from '../../utils/constant';
+import { CANDIDATE_ADDRESS, CANDIDATE_DATA, COURT_SEARCH_ADDED, COURT_SEARCH_DATA, 
+  COURT_SEARCH_DELETED, COURT_SEARCH_EXIST, COURT_SEARCH_FOUND, COURT_SEARCH_LIST, 
+  COURT_SEARCH_NOT_FOUND, COURT_SEARCH_UPDATED, LOGIN_CRED, NOT_AUTHENTICATED, RECRUITER_DATA, 
+  VALIDATION_FAILED } from '../../utils/constant';
 
 chai.use(chaiHttp);
 
@@ -33,7 +36,7 @@ before(async () => {
         await recruiter.save();
         const loginResponse = await chai.request(app)
             .post('/auth/login')
-            .send(LOGIN_CRED)
+            .send({...LOGIN_CRED, password:'password'})
         token = loginResponse.body.token;
         id=loginResponse.body.recruiterId;
     });

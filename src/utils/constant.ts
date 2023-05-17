@@ -6,7 +6,6 @@ export const RECRUITER_DATA = {
 };
 export const LOGIN_CRED = {
      email: 'test@checkr.com',
-     password: 'password'
 };
 export const CANDIDATE_DATA = {
         firstName: "sam",

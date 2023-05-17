@@ -27,7 +27,7 @@ before(async () => {
         await recruiter.save();
         const loginResponse = await chai.request(app)
             .post('/auth/login')
-            .send(LOGIN_CRED)
+            .send({...LOGIN_CRED, password:'password'})
         token = loginResponse.body.token;
         id=loginResponse.body.recruiterId;
 

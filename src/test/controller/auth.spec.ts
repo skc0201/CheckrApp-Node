@@ -54,8 +54,7 @@ describe('Auth API', () => {
       const res = await chai
         .request(app)
         .post('/auth/login')
-        .send(LOGIN_CRED);
-
+        .send({...LOGIN_CRED, password:'password'});
       expect(res).to.have.status(200);
       expect(res.body).to.have.property('token');
       expect(res.body).to.have.property('recruiterId');
