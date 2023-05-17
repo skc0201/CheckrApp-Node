@@ -119,7 +119,7 @@ export const updateCandidate = (req: Request, res: Response, next: NextFunction)
                 const error = new Error('Could not find candidate with id: ' + id);
                 throw error;
             }
-            addId = candidate?.address!;
+            addId = candidate?.address;
             candidate.firstName = firstName;
             candidate.lastName = lastName;
             candidate.email = email;
@@ -142,7 +142,7 @@ export const updateCandidate = (req: Request, res: Response, next: NextFunction)
             address.state =state;
             address.pincode = pincode
 
-            address.save();
+            return address.save();
         })
         .then(result => {
             res.status(200).json({
@@ -162,7 +162,7 @@ export const deleteCandidate = (req: Request, res: Response, next: NextFunction)
             const error = new Error('Could not find candidate with id: ' + id);
             throw error;
           }
-          addressId = candidate?.address!;
+          addressId = candidate?.address;
           return Candidate.findByIdAndRemove(id);
     }).then(result =>{
         return Adddress.findByIdAndRemove(addressId)

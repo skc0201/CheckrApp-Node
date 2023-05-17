@@ -47,7 +47,7 @@ export const AddCourtSearchReport = (req: Request, res: Response, next: NextFunc
             country_criminal:country_criminal,
             candidate:candidateId
         });
-        courtSearchReport.save()
+       return courtSearchReport.save()
         .then(result => {
             res.status(201).json({
                 message:"Candidate court search Report added successfully" , Report: result

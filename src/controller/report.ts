@@ -46,7 +46,7 @@ export const addReport = (req: Request, res: Response, next: NextFunction) => {
             tat:tat,
             candidate:candidateId
         });
-        report.save()
+        return report.save()
         .then(result => {
             res.status(201).json({
                 message:"Candidate Report added successfully" , Report: result

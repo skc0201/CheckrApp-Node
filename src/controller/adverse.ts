@@ -44,7 +44,7 @@ export const AddAdverse = (req: Request, res: Response, next: NextFunction) => {
             post_notice_date:post_notice_date,
             candidate:candidateId
         });
-        adverse.save()
+        return adverse.save()
         .then(result => {
             res.status(201).json({
                 message:"Candidate adverse Report added successfully" , Report: result

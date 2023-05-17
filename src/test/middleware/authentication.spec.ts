@@ -89,8 +89,6 @@ describe('Authentication middleware', () => {
 		sandbox.stub(jwt, 'verify').returns(obj);
         assert.throws(function() { authenticate(request , response , next) }, Error, 'Not authenticated!!.');
         expect(request).not.have.property('userId');
-		expect(request).not.have.property('userId', 'abc');
-
 	});
 	afterEach(() => {
 		sandbox.restore();

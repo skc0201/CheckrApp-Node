@@ -30,7 +30,7 @@ mongoose
   .connect(process.env.URL)
   .then(() => {
     console.log('Connected to Checkr-App DB!!!!');
-    app.listen(process.env.PORT || 8080, () => {
+    app.listen(process.env.PORT ?? 8080, () => {
         console.log('Server is running at port : ' + process.env.PORT)
     });
   })

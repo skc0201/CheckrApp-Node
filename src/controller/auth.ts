@@ -31,7 +31,7 @@ export const addRecruiter = (req: Request, res: Response, next: NextFunction) =>
             company:company,
             phone: phone
         });
-        recruiter.save()
+        return recruiter.save()
         .then(result => {
             res.status(201).json({
                 message:"Recruiter added successfully" , recruiterId: result._id
