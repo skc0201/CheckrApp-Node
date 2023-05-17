@@ -24,9 +24,6 @@ on:
  push:
    branches:
      - main
-  pull_request:
-    branches:
-    - main
  pull_request:
    types: [opened, synchronize, reopened]
 jobs:
@@ -39,7 +36,7 @@ jobs:
           fetch-depth: 0 
       - name: Install dependencies
         run: npm i
-      - name: Test and coverage
+      - name: Test coverage
         run: npm run test:coverage
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
