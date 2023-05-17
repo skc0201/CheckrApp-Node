@@ -16,7 +16,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
   try {
     decodedToken = jwt.verify(token, process.env.SECRET_KEY as string) as JwtPayload;
   } catch (err) {
-    throw err;
+    next(err);
   }
   if (!decodedToken) {
     const error = new Error('Not authenticated!!.');
