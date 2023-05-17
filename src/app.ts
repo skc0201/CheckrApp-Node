@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-import { Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import candidateRoute from './routes/candidate';
 import ReportRoute from './routes/report';
