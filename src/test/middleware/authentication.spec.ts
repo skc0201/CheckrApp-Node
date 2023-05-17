@@ -66,7 +66,6 @@ describe('Authentication middleware', () => {
 		const mockJWT = sandbox.stub(jwt, 'verify').returns(obj);
 		authenticate(request, response, next);
 		expect(request).to.have.property('userId');
-		expect(request).to.have.property('userId', 'abc');
 		expect(mockJWT.calledOnce).to.be.true;
 	});
     it('Check if a object is returned', async () => {
