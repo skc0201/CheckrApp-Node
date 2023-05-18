@@ -8,6 +8,7 @@ export interface ICandidate {
     license: string;
     DOB: Date;
     address: Types.ObjectId
+    recruiter: Types.ObjectId
 };
 
 export interface IAddress {
@@ -55,3 +56,8 @@ export interface ICourtSearches {
     country_criminal: ICourtSearch;
     candidate: Types.ObjectId;
 };
+
+export interface JwtPayload {
+    userId: string;
+    email: string;
+}

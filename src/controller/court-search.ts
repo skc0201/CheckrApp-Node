@@ -1,5 +1,7 @@
 import { Request , Response, NextFunction } from "express"
 import CourtSearch from '../models/court-searches';
+import { validationResult } from "express-validator";
+import { COURT_SEARCH_ADDED, COURT_SEARCH_DELETED, COURT_SEARCH_EXIST, COURT_SEARCH_FOUND, COURT_SEARCH_LIST, COURT_SEARCH_NOT_FOUND, COURT_SEARCH_UPDATED, VALIDATION_FAILED } from "../utils/constant";
 
 
 export const getAllCourtSearchReport = (req: Request, res: Response, next: NextFunction) => {
@@ -8,7 +10,7 @@ export const getAllCourtSearchReport = (req: Request, res: Response, next: NextF
         .populate('candidate')
         .then(reports => {
             res.status(200).json({
-                message:"Court search report of all candidates fetched Successfully",
+                message:COURT_SEARCH_LIST,
                 data: reports
             })
         }).catch(error => {
@@ -18,16 +20,21 @@ export const getAllCourtSearchReport = (req: Request, res: Response, next: NextF
 
 export const AddCourtSearchReport = (req: Request, res: Response, next: NextFunction) => {
     const candidateId = req.params.candidateId;
-    const ssn_verification = req.body.ssn_verification;
-    const sex_offender = req.body.sex_offender;
-    const global_watchlist = req.body.global_watchlist;
-    const federal_criminal = req.body.federal_criminal;
-    const country_criminal = req.body.country_criminal;
+
+    const {ssn_verification , sex_offender , global_watchlist , federal_criminal , country_criminal }  = req.body;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error(VALIDATION_FAILED);
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     CourtSearch
-    .find({candidate: candidateId})
+    .findOne({candidate: candidateId})
     .then(result => {
-        if(result[0]){
-            const error = new Error('Report already exists for candidate id ' + candidateId);
+        if(result){
+            const error = new Error(COURT_SEARCH_EXIST + candidateId);
             throw error;
         }
         const courtSearchReport = new CourtSearch({
@@ -38,10 +45,10 @@ export const AddCourtSearchReport = (req: Request, res: Response, next: NextFunc
             country_criminal:country_criminal,
             candidate:candidateId
         });
-        courtSearchReport.save()
+       return courtSearchReport.save()
         .then(result => {
             res.status(201).json({
-                message:"Candidate court search Report added successfully" , Report: result
+                message:COURT_SEARCH_ADDED , Report: result
             })
         })
     })
@@ -52,16 +59,16 @@ export const AddCourtSearchReport = (req: Request, res: Response, next: NextFunc
 export const getCourtSearchReportById = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.candidateId;
     CourtSearch
-        .find({candidate: id})
+        .findOne({candidate: id})
         .populate('candidate')
         .then(report => {
-            if(!report[0]){
-                const error = new Error('Could not find candidate report with id: ' + id);
+            if(!report){
+                const error = new Error(COURT_SEARCH_NOT_FOUND + id);
                 throw error;
             }
             res.status(200).json({
-                message:"Candidate report fetched Successfully",
-                candidates: report[0]
+                message:COURT_SEARCH_FOUND,
+                candidates: report
             })
         }).catch(error => {
             next(error);
@@ -70,17 +77,17 @@ export const getCourtSearchReportById = (req: Request, res: Response, next: Next
 
 export const deleteCourtSearch = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.candidateId;
-    CourtSearch.find({candidate: id})
+    CourtSearch.findOne({candidate: id})
     .then(candidate => {
-        if (!candidate[0]) {
-            const error = new Error('Could not find candidate with id: ' + id);
+        if (!candidate) {
+            const error = new Error(COURT_SEARCH_NOT_FOUND + id);
             throw error;
           }
-          return CourtSearch.findByIdAndRemove(candidate[0]._id);
+          return CourtSearch.findByIdAndRemove(candidate._id);
     })
     .then(result =>{
         res.status(200).json({
-            message:"Candidate report deleted successfully!!",
+            message: COURT_SEARCH_DELETED,
         })
     })
     .catch(error => {
@@ -90,29 +97,33 @@ export const deleteCourtSearch = (req: Request, res: Response, next: NextFunctio
 
 export const updateCourtSearchById = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.candidateId;
-    const ssn_verification = req.body.ssn_verification;
-    const sex_offender = req.body.sex_offender;
-    const global_watchlist = req.body.global_watchlist;
-    const federal_criminal = req.body.federal_criminal;
-    const country_criminal = req.body.country_criminal;
+    const {ssn_verification , sex_offender , global_watchlist , federal_criminal , country_criminal }  = req.body;
 
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error(VALIDATION_FAILED);
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     CourtSearch
-        .find({candidate: id})
+        .findOne({candidate: id})
         .then(report => {
-            if(!report[0]){
-                const error = new Error('Could not find candidate report with id: ' + id);
+            if(!report){
+                const error = new Error(COURT_SEARCH_NOT_FOUND + id);
                 throw error;
             }
-            report[0].ssn_verification = ssn_verification;
-            report[0].sex_offender = sex_offender;
-            report[0].global_watchlist = global_watchlist;
-            report[0].federal_criminal = federal_criminal;
-            report[0].country_criminal = country_criminal;
-            return report[0].save()
+            report.ssn_verification = ssn_verification;
+            report.sex_offender = sex_offender;
+            report.global_watchlist = global_watchlist;
+            report.federal_criminal = federal_criminal;
+            report.country_criminal = country_criminal;
+            return report.save()
         })
         .then(result => {
             res.status(200).json({
-                message:"Candidate report updated Successfully",
+                message:COURT_SEARCH_UPDATED,
                 data: result
             })
         })

@@ -4,23 +4,42 @@
   "description": "Developing API for checkr app",
   "main": "dist/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --watch './**/*.ts' --exec 'ts-node' src/app.ts"
+    "test": "mocha --exit --require ts-node/register --colors src/test/**/*.spec.ts --timeout 20000",
+    "start": "nodemon --watch './**/*.ts' --exec 'ts-node' src/app.ts",
+    "test:coverage": "nyc npm run test"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.3.0",
-    "mongoose": "^7.1.0"
+    "mongoose": "^7.1.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/bcryptjs": "^2.4.2",
     "@types/body-parser": "^1.19.2",
+    "@types/chai": "^4.3.5",
     "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/mocha": "^10.0.1",
+    "@types/morgan": "^1.9.4",
     "@types/node": "^18.16.3",
+    "@types/sinon": "^10.0.15",
+    "@types/winston": "^2.4.4",
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.2.0",
     "nodemon": "^2.0.22",
+    "nyc": "^15.1.0",
+    "sinon": "^15.0.4",
     "ts-node": "^10.9.1"
   }
 }

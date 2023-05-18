@@ -31,7 +31,12 @@ const candidateSchema = new Schema<ICandidate>(
       type: Schema.Types.ObjectId,
       ref: 'Address',
       required:true
-    }
+    },
+    recruiter: {
+      type: Schema.Types.ObjectId,
+      ref: 'Address',
+      required:true
+    },
   },
   { timestamps: true }
 );

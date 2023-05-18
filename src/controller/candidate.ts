@@ -2,6 +2,8 @@ import { Request , Response, NextFunction } from "express"
 import Adddress from '../models/address';
 import Candidate from '../models/candidate';
 import  { Types } from "mongoose";
+import { validationResult } from "express-validator";
+import { CANDIDATE_ADDED, CANDIDATE_ADDRESS_NOT_FOUND, CANDIDATE_DELETED, CANDIDATE_LIST, CANDIDATE_NOT_FOUND, CANDIDATE_UPDATED, VALIDATION_FAILED } from "../utils/constant";
 
 
 export const getAllCandidates = (req: Request, res: Response, next: NextFunction) => {
@@ -10,7 +12,7 @@ export const getAllCandidates = (req: Request, res: Response, next: NextFunction
         .populate('address')
         .then(candidates => {
             res.status(200).json({
-                message:"Candidates fetched Successfully",
+                message:CANDIDATE_LIST,
                 candidates: candidates
             })
         }).catch(error => {
@@ -19,17 +21,18 @@ export const getAllCandidates = (req: Request, res: Response, next: NextFunction
 }
 
 export const addCandidate = (req: Request, res: Response, next: NextFunction) => {
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const email = req.body.email;
-    const contact = req.body.contact;
-    const license = req.body.license;
-    const DOB = req.body.DOB;
-    const houseNo = req.body.houseNo;
-    const streetNo = req.body.streetNo;
-    const city = req.body.city;
-    const state = req.body.state;
-    const pincode = req.body.pincode;
+
+    const {firstName, lastName ,email ,contact , license , DOB , houseNo,
+    streetNo, city, state ,pincode
+    } = req.body;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error(VALIDATION_FAILED);
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
     const address = new Adddress({
         houseNo:houseNo,
         streetNo:streetNo,
@@ -47,13 +50,14 @@ export const addCandidate = (req: Request, res: Response, next: NextFunction) =>
             contact:contact,
             license:license,
             DOB:DOB,
-            address:addId
+            address:addId,
+            recruiter:req.userId
         });
         return candidate.save()
     })
     .then(candidate => {
         res.status(201).json({
-            message:"Candidate added successfully" , candidate: candidate
+            message:CANDIDATE_ADDED , candidate: candidate
         })
     })
     .catch(error => {
@@ -67,11 +71,11 @@ export const getCandidateById = (req: Request, res: Response, next: NextFunction
         .populate('address')
         .then(candidate => {
             if(!candidate){
-                const error = new Error('Could not find candidate with id: ' + id);
+                const error = new Error(CANDIDATE_NOT_FOUND + id);
                 throw error;
             }
             res.status(200).json({
-                message:"Candidate fetched Successfully",
+                message:CANDIDATE_LIST,
                 candidates: candidate
             })
         }).catch(error => {
@@ -81,26 +85,27 @@ export const getCandidateById = (req: Request, res: Response, next: NextFunction
 
 export const updateCandidate = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.candidateId;
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const email = req.body.email;
-    const contact = req.body.contact;
-    const license = req.body.license;
-    const DOB = req.body.DOB;
-    const houseNo = req.body.houseNo;
-    const streetNo = req.body.streetNo;
-    const city = req.body.city;
-    const state = req.body.state;
-    const pincode = req.body.pincode;
+    const {firstName, lastName ,email ,contact , license , DOB , houseNo,
+        streetNo, city, state ,pincode
+        } = req.body;
     let addId: Types.ObjectId;
+
+    const valError = validationResult(req);
+    if(!valError.isEmpty()){
+        const error = new Error(VALIDATION_FAILED);
+        error.statusCode = 422;
+        error.data = valError.array();
+        throw error;  
+      }
+      
     Candidate
         .findById(id)
         .then(candidate => {
             if(!candidate){
-                const error = new Error('Could not find candidate with id: ' + id);
+                const error = new Error(CANDIDATE_NOT_FOUND+ id);
                 throw error;
             }
-            addId = candidate?.address!;
+            addId = candidate?.address;
             candidate.firstName = firstName;
             candidate.lastName = lastName;
             candidate.email = email;
@@ -114,7 +119,7 @@ export const updateCandidate = (req: Request, res: Response, next: NextFunction)
         })
         .then(address => {
             if(!address){
-                const error = new Error('Could not find address of candidate with id: ' + id);
+                const error = new Error(CANDIDATE_ADDRESS_NOT_FOUND + addId);
                 throw error;
             }          
              address.houseNo = houseNo;
@@ -123,11 +128,11 @@ export const updateCandidate = (req: Request, res: Response, next: NextFunction)
             address.state =state;
             address.pincode = pincode
 
-            address.save();
+            return address.save();
         })
         .then(result => {
             res.status(200).json({
-                message:"Candidate details updated Successfully",
+                message:CANDIDATE_UPDATED,
             })
         })
         .catch(error => {
@@ -140,17 +145,17 @@ export const deleteCandidate = (req: Request, res: Response, next: NextFunction)
     Candidate.findById(id)
     .then(candidate => {
         if (!candidate) {
-            const error = new Error('Could not find candidate with id: ' + id);
+            const error = new Error(CANDIDATE_NOT_FOUND + id);
             throw error;
           }
-          addressId = candidate?.address!;
+          addressId = candidate?.address;
           return Candidate.findByIdAndRemove(id);
     }).then(result =>{
         return Adddress.findByIdAndRemove(addressId)
     })
     .then(result =>{
         res.status(200).json({
-            message:"Candidate deleted",
+            message: CANDIDATE_DELETED,
         })
     })
     .catch(error => {
