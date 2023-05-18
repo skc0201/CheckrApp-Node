@@ -7,7 +7,9 @@ import Candidate from '../../models/candidate';
 import Recruiter from '../../models/recruiter';
 import Adverse from '../../models/adverse-action';
 import  { Types } from 'mongoose';
-import { ADVERSE_ADD, ADVERSE_LIST_SUCCESS, CANDIDATE_ADDRESS, CANDIDATE_ADVERSE, CANDIDATE_DATA, LOGIN_CRED, NOT_AUTHENTICATED, RECRUITER_DATA, VALIDATION_FAILED } from '../../utils/constant';
+import { ADVERSE_ADD, ADVERSE_LIST_SUCCESS, CANDIDATE_ADDRESS,
+  CANDIDATE_ADVERSE, CANDIDATE_DATA, LOGIN_CRED, NOT_AUTHENTICATED, 
+  RECRUITER_DATA, VALIDATION_FAILED } from '../../utils/constant';
 
 chai.use(chaiHttp);
 
